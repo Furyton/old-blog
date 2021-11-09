@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/captain-america-shield-captain-america.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    
+        <link rel="mask-icon" href="/safari-pinned-tab.svg">
+    
+
+
+    <!-- meta -->
+
+
+<title>Transformer模型学习笔记 | Furyton</title>
+
+
+    <meta name="keywords" content="Machine Learning, NLP, blog">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="Transformer 模型学习笔记 论文地址Attention Is All You Need Nice Blog for illustrating Transformer Model seq2seq with attention 提出的特点  RNN无法并行地去处理一个序列, 因为每个hidden state \(h_i\)都是依赖于上一个hidden state \(h_{i-1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transformer模型学习笔记">
+<meta property="og:url" content="http://furyton.github.io/2020/11/09/Transformer%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Furyton">
+<meta property="og:description" content="Transformer 模型学习笔记 论文地址Attention Is All You Need Nice Blog for illustrating Transformer Model seq2seq with attention 提出的特点  RNN无法并行地去处理一个序列, 因为每个hidden state \(h_i\)都是依赖于上一个hidden state \(h_{i-1">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://furyton.github.io/upload_image/attention_with_one_head.png">
+<meta property="og:image" content="http://furyton.github.io/upload_image/attention_with_one_head_2.png">
+<meta property="og:image" content="http://furyton.github.io/upload_image/multihead.png">
+<meta property="og:image" content="http://furyton.github.io/upload_image/attention_with_multihead.png">
+<meta property="og:image" content="http://furyton.github.io/upload_image/attention_with_3heads.png">
+<meta property="og:image" content="http://furyton.github.io/upload_image/transformer_model_arch.png">
+<meta property="article:published_time" content="2020-11-08T17:22:25.000Z">
+<meta property="article:modified_time" content="2021-11-06T07:11:42.921Z">
+<meta property="article:author" content="Wu Shiguang">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="NLP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://furyton.github.io/upload_image/attention_with_one_head.png">
+
+
+    
+<link rel="stylesheet" href="/css/style/main.css">
+ 
+
+    
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="https://cdn.jsdelivr.net/npm/highlight.js@10.1.2/styles/atom-one-light.css" media="none" >
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="https://cdn.jsdelivr.net/npm/highlight.js@10.1.2/styles/atom-one-dark.css" media="none">
+        
+    
+
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+ 
+
+    <!-- custom head -->
+
+    
+        <meta name="baidu-site-verification" content="code-X7mm2HpCMG" /> 
+    
+        <meta name="google-site-verification" content="MdF6kGSidGrvCpYUMmpTpg9Rxq2vUoK5C8kA5T9VxoQ" /> 
+    
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Furyton" type="application/atom+xml">
+</head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">Furyton&#39;s blog</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">Main</a>
+                
+                    <a href="/tags/" class="navbar-menu button">Tags</a>
+                
+                    <a href="/archives/" class="navbar-menu button">Archives</a>
+                
+                    <a href="/categories/" class="navbar-menu button">Categories</a>
+                
+                    <a href="/about/" class="navbar-menu button">About</a>
+                
+                    <a href="/small-talk/" class="navbar-menu button">Talk</a>
+                
+            </div>
+        
+        
+        
+    <a href="/search/" id="btn-search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="24" height="24" fill="currentColor" stroke="currentColor" stroke-width="32"><path d="M192 448c0-141.152 114.848-256 256-256s256 114.848 256 256-114.848 256-256 256-256-114.848-256-256z m710.624 409.376l-206.88-206.88A318.784 318.784 0 0 0 768 448c0-176.736-143.264-320-320-320S128 271.264 128 448s143.264 320 320 320a318.784 318.784 0 0 0 202.496-72.256l206.88 206.88 45.248-45.248z"></path></svg>
+    </a>
+
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">Main</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">Tags</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">Archives</a>
+                
+                    <a href="/categories/" class="dropdown-menu button">Categories</a>
+                
+                    <a href="/about/" class="dropdown-menu button">About</a>
+                
+                    <a href="/small-talk/" class="dropdown-menu button">Talk</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        Transformer模型学习笔记
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2020/11/" class="post-meta__date button">2020-11-09</a>
+        
+    <span class="separate-dot"></span><a href="/categories/Lab/" class="button">Lab</a>
+
+    <span class="separate-dot"></span><a href="/categories/Machine-Learning/" class="button">Machine Learning</a>
+
+    <span class="separate-dot"></span><a href="/categories/Lab/Basic/" class="button">Basic</a>
+
+ 
+        
+    
+     
+    <span id="busuanzi_container_page_pv" hidden>
+        <span class="separate-dot"></span>
+        <span></span>
+        <span id="busuanzi_value_page_pv"></span>
+        <span>Views</span>
+    </span>
+
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+
+<article class="post content-card">
+    <div class="post__header"></div>
+    <div class="post__content">
+        <h1 id="transformer-模型学习笔记">Transformer 模型学习笔记</h1>
+<h6 id="论文地址attention-is-all-you-need">论文地址<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1706.03762.pdf">Attention Is All You Need</a></h6>
+<h6 id="nice-blog-for-illustrating-transformer-model"><a target="_blank" rel="noopener" href="http://jalammar.github.io/illustrated-transformer/">Nice Blog for illustrating Transformer Model</a></h6>
+<h6 id="seq2seq-with-attention"><a target="_blank" rel="noopener" href="https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/">seq2seq with attention</a></h6>
+<h4 id="提出的特点">提出的特点</h4>
+<ul>
+<li>RNN无法并行地去处理一个序列, 因为每个hidden state <span class="math inline">\(h_i\)</span>都是依赖于上一个hidden state <span class="math inline">\(h_{i-1}\)</span>以及input. 所以就要一个step接一个step的去循环, 对于很长的序列训练起来就很耗时. Transformer 模型<strong>利用Attention机制</strong>去捕获全局的input与output之间的依赖性, 实质上就是将整条序列看作一个input向量, 也就<strong>避免</strong>了循环神经网络中的"<strong>循环</strong>". 实质上算是对RNN循环过程的一个展开吧.</li>
+<li><strong>完全使用Attention机制</strong>, 没有使用序列对齐的循环(sequence-aligned recurrence)或者卷积层</li>
+</ul>
+<h4 id="背景知识">背景知识</h4>
+<h5 id="self-attention的优势">Self attention的优势</h5>
+<ul>
+<li>Gated RNNs 虽然在结构上能够记录前 <span class="math inline">\(n - 1\)</span> 个token的信息, 但实际上, 随着序列变长, 最早的token信息会变得很少, 这就会失去他的准确性, 这在翻译任务中就显得非常要命, 例如, 在English-to-French的翻译里, output的第一个词大概率是依赖于input开始的部分, 这样很可能会得到很差的结果. 而transformer模型似乎是靠着更大的存储和算力来强行将前 <span class="math inline">\(n\)</span> 个token利用attention融合起来. 这样看来, 似乎是对症下药, 实验上也得到了很好的结果.</li>
+<li>而具体的self attention会在模型架构中介绍</li>
+</ul>
+<h5 id="word-embedding">Word Embedding</h5>
+<h6 id="blog-for-introducing-word2vec"><a target="_blank" rel="noopener" href="https://medium.com/deeper-learning/glossary-of-deep-learning-word-embedding-f90c3cec34ca">Blog for introducing Word2Vec</a></h6>
+<p>我自己的<a href="https://furyton.github.io/2020/11/11/Word2Vec/">对Word2Vec的学习笔记</a></p>
+<h4 id="模型架构">模型架构</h4>
+<p>其实Transformer模型的改进应该去对比seq2seq with attention模型</p>
+<ul>
+<li><p>首先在seq2seq模型里,用的是最初的encoder-decoder思想, 拿翻译任务来说, input就是一个句子, encoder需要一个单词一个单词(token)的去encode, 也就是扔进一个RNNs, 每次得到一个hidden state, 句子全输进去了, 最后得到的hidden state就可以作为整个句子的representation. 这个思想很简单, 给我的是不定长的, 那我就把他搞成一个固定长度的hidden state. 之后拿着这个representation当作decoder的input, 再一个单词一个单词的预测. 前后都是RNN.</p>
+<p>乍一看貌似还是挺好的, 但问题是RNN的记忆机制和梯度问题解决的不是那么好, 句子长了前面的单词他就忘记了. 而且翻译这个任务也确实需要一种attention ,output的某一个部分会很大程度依赖于input中的一部分.</p></li>
+<li><p>加了attention的seq2seq似乎就考虑到了这种依赖关系, attention机制也很好的做到了这一点. 至于整体做法, 上面不是说encoder内不断地生成hidden state吗, 那我们就把它们全都取出来作为decoder的input, 这样就不用太担心记忆的问题了, 毕竟你把它们都拿出来了. 然后每个output预测值会利用attention机制去给这些hidden state附上注意力的权重, 来更好地完成任务.</p></li>
+<li><p>再到transformer. 这样纵向的来看, 似乎改进的地方确实如原论文所讲, 去掉了所有的循环连接. 完全用attention来解决. 这样做就需要在一些地方进行调整.</p></li>
+</ul>
+<h5 id="attention">Attention</h5>
+<p>虽然字面上讲的attention, 似乎是个很熟悉的概念, 但实际在具体的实现上是另一种更加抽象的机制.</p>
+<p>一般来讲,这个问题是想输入两种序列, <span class="math inline">\(S= \{S_1, S_2, S_3 \dots S_n \}\)</span> 以及 <span class="math inline">\(T =\{T_1, T_2, T_3 \dots T_m \}\)</span> 我想输出<span class="math inline">\(T\)</span> 对于<span class="math inline">\(S\)</span> 的attention, 具体的可以说就是一个function, <span class="math inline">\(Attention_{S_i}(T_j),\quad i= 1,2\dots n\)</span></p>
+<p>,然后有 <span class="math display">\[
+\sum_{j} Attention_{S_i}(T_j)=1, \quad i = 1,2,\dots n
+\]</span> 就可以,值越大就越重要. 那么整个T对于 <span class="math inline">\(S_i\)</span> 的representation就是 <span class="math inline">\(T_{s_i} = \sum_{j} Attention_{S_i} (T_j)\times Value(T_j)\)</span> 这么一个加权平均</p>
+<p>这里的元素就是一些embedding, 一些向量.</p>
+<p>Attention的求法类似于一种查询. 每个 <span class="math inline">\(S_i\)</span> 都会对应一个query向量 <span class="math inline">\(\boldsymbol{q_i}\)</span> 每个 <span class="math inline">\(T_i\)</span> 又对应一个键值 <span class="math inline">\(\boldsymbol{k_i}\)</span> 以供"查询", 查到的结果就是两个向量的点积 <span class="math inline">\(a_{ij} = \boldsymbol{q_i} \cdot \boldsymbol{k_j}\)</span> , (假设这里的两个向量的维数都是 <span class="math inline">\(d_k\)</span> ).</p>
+<p>最后的Attention就是再加上一个softmax <span class="math display">\[
+Attention_{S_i}(T_j)  = \frac{e^{\boldsymbol{q_i} \cdot \boldsymbol{k_j}^T}}{\sum_j e^{\boldsymbol{q_i} \cdot \boldsymbol{k_j}^T}}
+\]</span></p>
+<p>每个 <span class="math inline">\(T_j\)</span> 又会对应一个Value向量 <span class="math inline">\(v_j\)</span> (维度可以和前面两个向量不同, 记为<span class="math inline">\(d_v\)</span>)用以获得representation. 最后得到的就是 <span class="math display">\[
+Representation_{for\ S_i} = softmax(\boldsymbol{q}_{1\times d_k}\cdot \boldsymbol K_{m \times d_k}^T) \boldsymbol V_{m\times d_k}
+\]</span> 进一步可以获得 <span class="math inline">\(T\)</span> 对 <span class="math inline">\(S\)</span> 的表示 <span class="math display">\[
+softmax(\boldsymbol{Q}_{n\times d_k}\cdot \boldsymbol K_{m \times d_k}^T) \boldsymbol V_{m\times d_v}
+\]</span> 为了"having more stable gradients" , 在<span class="math inline">\(\boldsymbol{Q}\cdot \boldsymbol K^T\)</span>这里还要除以一个因子, 默认是 <span class="math inline">\(\sqrt{d_k}\)</span> ,</p>
+<p>然后又变成了 <span class="math display">\[
+softmax(\frac{\boldsymbol{Q}\cdot \boldsymbol K^T}{\sqrt{d_k}}) \boldsymbol V
+\]</span> 有人要问了, 你说的这些query,key和value向量都咋求呢.</p>
+<ul>
+<li>用三个线性映射(矩阵) <span class="math inline">\(W^Q,W^K,W^V\)</span></li>
+</ul>
+<p>线性映射哪来的呢</p>
+<ul>
+<li>学出来的</li>
+</ul>
+<h5 id="a-beast-with-multihead">a beast with multihead</h5>
+<p>这样一组attention可能注意力太集中, 看不全, 那我们就让他有多个"头", 注意力分散点, 看得更全</p>
+<p><a target="_blank" rel="noopener" href="https://colab.research.google.com/github/tensorflow/tensor2tensor/blob/master/tensor2tensor/notebooks/hello_t2t.ipynb">tensor2tensor</a>上有个示例, 演示的就是attention</p>
+<p>一个比较经典的例子 翻译句子 The animal didn't cross the street because it was too tired</p>
+<p>这里的 it 应该代指 The animal, 但是对模型来说, 他也可能是说the street.</p>
+<div data-align="center">
+<img src="\upload_image\attention_with_one_head.png" class="lazy" data-srcset="\upload_image\attention_with_one_head.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEXMzMyWlpYU2uzLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==" alt="attention with one head" style="zoom:50%;" />
+</div>
+<p>这里可以看到, 模型确实被it的代指给弄晕了,但还好animal处的颜色比street的地方要深,说明他的权值要大</p>
+<div data-align="center">
+<img src="\upload_image\attention_with_one_head_2.png" class="lazy" data-srcset="\upload_image\attention_with_one_head_2.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEXMzMyWlpYU2uzLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==" alt="attention with one head(2)" style="zoom: 50%;" />
+</div>
+<p>但并不是所有的attention都能学到对应的部分.</p>
+<p>解决办法就是, 我们用多个attention去拼接成最终想要的representation. 具体的, 我们得到的value向量不是 <span class="math inline">\(d_v\)</span> 维的吗, 假设我们有 <span class="math inline">\(h\)</span> 个head, 那么就把向量分为<span class="math inline">\(h\)</span> 个维度为 <span class="math inline">\(d_v / h\)</span> 的向量, 每个用各自的线性映射得到 <span class="math inline">\(h\)</span> 组不同的 <span class="math inline">\(\boldsymbol{Q,\, K,\, V_{m \times (d_v/h)}}\)</span> 去求各自的value(attention结构图片来自<a target="_blank" rel="noopener" href="http://jalammar.github.io/illustrated-transformer/">这个blog</a>)</p>
+<div data-align="center">
+<img src="\upload_image\multihead.png" class="lazy" data-srcset="\upload_image\multihead.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEXMzMyWlpYU2uzLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==" alt="multihead attention" style="zoom:50%;" />
+</div>
+<p>最后一般还会再乘上一个矩阵 <span class="math inline">\(W^O\)</span>,来得到最后的输出</p>
+<div data-align="center">
+<img src="\upload_image\attention_with_multihead.png" class="lazy" data-srcset="\upload_image\attention_with_multihead.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEXMzMyWlpYU2uzLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==" alt="attention with multihead" style="zoom:50%;" />
+</div>
+<p>用上了多个head, 我们就能同时去关注不同的区域, 获得更准确的表述</p>
+<div data-align="center">
+<img src="\upload_image\attention_with_3heads.png" class="lazy" data-srcset="\upload_image\attention_with_3heads.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEXMzMyWlpYU2uzLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==" alt="attention with 3 heads" style="zoom:50%;" />
+</div>
+<h4 id="整体架构">整体架构</h4>
+<p>前面花了较长篇幅讲了Attention机制, 这里再看下它是如何被用在Transformer中的</p>
+<div data-align="center">
+<img src="\upload_image\transformer_model_arch.png" class="lazy" data-srcset="\upload_image\transformer_model_arch.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEXMzMyWlpYU2uzLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==" alt="transformer_model architecture" style="zoom:50%;"/>
+</div>
+<p>在上面的架构图中包含encoder以及decoder的结构(结构图来自原论文)</p>
+<p>左边是encoder, 他的特点就是直接将整条序列直接放进网络层中.</p>
+<p>工作流程就是, 首先把要处理的序列input输入, 再获得它的embeddings. 然后依次进入每个encoder层,</p>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2021-11-06</p></div> 
+    <div class="post-entry__tags"><a href="/tags/Machine-Learning/" class="post-tags__link button"># Machine Learning</a><a href="/tags/NLP/" class="post-tags__link button"># NLP</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2020/11/09/%E5%A4%9A%E8%BE%B9%E5%BD%A2%E7%9A%84%E6%89%AB%E6%8F%8F%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%8C%BA%E5%9F%9F%E5%A1%AB%E5%85%85%E7%AE%97%E6%B3%95/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            多边形的扫描转换与区域填充算法
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2020/11/08/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            我的第一篇文章
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+    <div class="post__comments content-card" id="comment">
+        
+    <h4>Comments</h4>
+    
+    <div id="disqus_thread"></div>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+    </div>
+
+
+
+</main>
+
+            <footer class="footer">
+     
+    <a href="#" class="button" id="b2t" aria-label="Back to Top" title="Back to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="32" height="32">
+            <path d="M233.376 722.752L278.624 768 512 534.624 745.376 768l45.248-45.248L512 444.128zM192 352h640V288H192z" fill="currentColor"></path>
+        </svg>
+    </a>
+
+    
+
+
+    
+    
+    
+        <span id="busuanzi_container_site_uv" hidden>
+            <span></span>
+            <span id="busuanzi_value_site_uv"></span>
+            <span>Viewers</span>
+            
+                <span>|</span>
+            
+        </span>
+    
+    
+        <span id="busuanzi_container_site_pv" hidden>
+            <span></span>
+            <span id="busuanzi_value_site_pv"></span>
+            <span>Views</span>
+            
+        </span>
+    
+ 
+ 
+
+ 
+    
+        
+                <p class="footer-copyright">
+                    Copyright ©
+                    2021
+                        <a target="_blank" rel="noopener" href="https://github.com/Furyton">
+                            Furyton
+                        </a>
+                </p>
+                
+                    
+</footer>
+        </div>
+        
+    <script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+    <script>
+        window.lazyLoadOptions = {
+            elements_selector: ".lazy",
+            threshold: 0
+        };
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement('script');
+            hm.src = 'https://hm.baidu.com/hm.js?00b1c580974b8695725e0ac0c3bc5826';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+ 
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('true'),
+            auto_fancybox = Boolean('false')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+
+    <script>
+        if (typeof MathJax === 'undefined') {
+            window.MathJax = {
+                loader: {
+                    source: {
+                        '[tex]/amsCd': '[tex]/amscd',
+                        '[tex]/AMScd': '[tex]/amscd'
+                    }
+                },
+                tex: {
+                    inlineMath: {'[+]': [['$', '$']]},
+                    tags: 'ams'
+                },
+                options: {
+                    renderActions: {
+                        findScript: [10, doc => {
+                            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                                const display = !!node.type.match(/; *mode=display/);
+                                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                                const text = document.createTextNode('');
+                                node.parentNode.replaceChild(text, node);
+                                math.start = {node: text, delim: '', n: 0};
+                                math.end = {node: text, delim: '', n: 0};
+                                doc.math.push(math);
+                            });
+                        }, '', false],
+                        insertedScript: [200, () => {
+                            document.querySelectorAll('mjx-container').forEach(node => {
+                                let target = node.parentNode;
+                                if (target.nodeName.toLowerCase() === 'li') {
+                                    target.parentNode.classList.add('has-jax');
+                                }
+                            });
+                        }, '', false]
+                    }
+                }
+            };
+            (function () {
+                var script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+                script.defer = true;
+                document.head.appendChild(script);
+            })();
+        } else {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+    
+    <script type="text/javascript">
+
+        function loadComment() {
+            let utterances, i;
+            (utterances = document.createElement("script")).src = 'https://utteranc.es/client.js';
+            document.getElementById('disqus_thread').appendChild(utterances);
+            utterances.async = true;
+            utterances.setAttribute('issue-term','title')
+            utterances.setAttribute('theme','github-light')
+            utterances.setAttribute('repo','Furyton/Furyton.github.io')
+            utterances.setAttribute('label','Comment')
+            utterances.crossorigin = 'anonymous';
+        }
+        
+        var runningOnBrowser = typeof window !== "undefined";
+        var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
+        var supportsIntersectionObserver = runningOnBrowser && "IntersectionObserver" in window;
+
+        setTimeout(function() {
+            if (!isBot && supportsIntersectionObserver) {
+                var comment_observer = new IntersectionObserver(function(entries) {
+                    if (entries[0].isIntersecting) {
+                        loadComment();
+                        comment_observer.disconnect();
+                    }
+                }, {
+                    threshold: [0]
+                });
+                comment_observer.observe(document.getElementById('comment'));
+            } else {
+                loadComment();
+            }
+        }, 1);
+    </script>
+
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+
+
+
+    </body>
+</html>
