@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/captain-america-shield-captain-america.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    
+        <link rel="mask-icon" href="/safari-pinned-tab.svg">
+    
+
+
+    <!-- meta -->
+
+
+<title>Logistic Regression and Maximum Entropy Model | Furyton</title>
+
+
+    <meta name="keywords" content="Basic, Study, blog">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="Logistic Regression 简介：一种简单的统计分类方法，因为使用了Logistic函数得名。称作回归(Regression)的原因是，这个模型实质是在做函数的拟合问题。 Logistic Function \[ f(x)&#x3D;\frac{1}{1+e^{-x}} \] 介于\(0\) ~ \(1\)之间 二分类的Logistic模型 \[ P(Y&#x3D;1|x)&#x3D;\frac{exp(w\cdo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Logistic Regression and Maximum Entropy Model">
+<meta property="og:url" content="http://furyton.github.io/2021/02/15/Logistic-regression/index.html">
+<meta property="og:site_name" content="Furyton">
+<meta property="og:description" content="Logistic Regression 简介：一种简单的统计分类方法，因为使用了Logistic函数得名。称作回归(Regression)的原因是，这个模型实质是在做函数的拟合问题。 Logistic Function \[ f(x)&#x3D;\frac{1}{1+e^{-x}} \] 介于\(0\) ~ \(1\)之间 二分类的Logistic模型 \[ P(Y&#x3D;1|x)&#x3D;\frac{exp(w\cdo">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-02-15T15:56:55.000Z">
+<meta property="article:modified_time" content="2021-11-14T17:15:22.690Z">
+<meta property="article:author" content="Wu Shiguang">
+<meta property="article:tag" content="Basic">
+<meta property="article:tag" content="Study">
+<meta name="twitter:card" content="summary_large_image">
+
+
+    
+<link rel="stylesheet" href="/css/style/main.css">
+ 
+
+    
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="https://cdn.jsdelivr.net/npm/highlight.js@10.1.2/styles/atom-one-light.css" media="none" >
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="https://cdn.jsdelivr.net/npm/highlight.js@10.1.2/styles/atom-one-dark.css" media="none">
+        
+    
+
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+ 
+
+    <!-- custom head -->
+
+    
+        <meta name="baidu-site-verification" content="code-X7mm2HpCMG" /> 
+    
+        <meta name="google-site-verification" content="MdF6kGSidGrvCpYUMmpTpg9Rxq2vUoK5C8kA5T9VxoQ" /> 
+    
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Furyton" type="application/atom+xml">
+</head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">Furyton&#39;s blog</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">Main</a>
+                
+                    <a href="/tags/" class="navbar-menu button">Tags</a>
+                
+                    <a href="/archives/" class="navbar-menu button">Archives</a>
+                
+                    <a href="/categories/" class="navbar-menu button">Categories</a>
+                
+                    <a href="/about/" class="navbar-menu button">About</a>
+                
+                    <a href="/small-talk/" class="navbar-menu button">Talk</a>
+                
+            </div>
+        
+        
+        
+    <a href="/search/" id="btn-search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="24" height="24" fill="currentColor" stroke="currentColor" stroke-width="32"><path d="M192 448c0-141.152 114.848-256 256-256s256 114.848 256 256-114.848 256-256 256-256-114.848-256-256z m710.624 409.376l-206.88-206.88A318.784 318.784 0 0 0 768 448c0-176.736-143.264-320-320-320S128 271.264 128 448s143.264 320 320 320a318.784 318.784 0 0 0 202.496-72.256l206.88 206.88 45.248-45.248z"></path></svg>
+    </a>
+
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">Main</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">Tags</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">Archives</a>
+                
+                    <a href="/categories/" class="dropdown-menu button">Categories</a>
+                
+                    <a href="/about/" class="dropdown-menu button">About</a>
+                
+                    <a href="/small-talk/" class="dropdown-menu button">Talk</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        Logistic Regression and Maximum Entropy Model
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2021/02/" class="post-meta__date button">2021-02-15</a>
+        
+    <span class="separate-dot"></span><a href="/categories/Lab/" class="button">Lab</a>
+
+    <span class="separate-dot"></span><a href="/categories/Lab/Basic/" class="button">Basic</a>
+
+ 
+        
+    
+     
+    <span id="busuanzi_container_page_pv" hidden>
+        <span class="separate-dot"></span>
+        <span></span>
+        <span id="busuanzi_value_page_pv"></span>
+        <span>Views</span>
+    </span>
+
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+
+<article class="post content-card">
+    <div class="post__header"></div>
+    <div class="post__content">
+        <h1 id="logistic-regression">Logistic Regression</h1>
+<p>简介：一种简单的统计分类方法，因为使用了Logistic函数得名。称作回归(Regression)的原因是，这个模型实质是在做函数的拟合问题。</p>
+<h2 id="logistic-function">Logistic Function</h2>
+<p><span class="math display">\[
+f(x)=\frac{1}{1+e^{-x}}
+\]</span></p>
+<p>介于<span class="math inline">\(0\)</span> ~ <span class="math inline">\(1\)</span>之间</p>
+<h2 id="二分类的logistic模型">二分类的Logistic模型</h2>
+<p><span class="math display">\[
+P(Y=1|x)=\frac{exp(w\cdot x+b)}{1+exp(w\cdot x+b)}
+\]</span> <span class="math display">\[
+P(Y=0|x)=\frac{1}{1+exp(w\cdot x+b)}
+\]</span> <span class="math inline">\(w，x \in \mathbf{R}^n\)</span> , <span class="math inline">\(b \in \mathbf{R}\)</span></p>
+<p>将 <span class="math inline">\(b\)</span> 并入到 <span class="math inline">\(w\)</span> 中，扩充 <span class="math inline">\(w\)</span> 和 <span class="math inline">\(x\)</span> ，从而得到更简洁的表达 <span class="math display">\[
+P(Y=1|x)=\frac{exp(w\cdot x)}{1+exp(w\cdot x)}
+\]</span> <span class="math display">\[
+P(Y=0|x)=\frac{1}{1+exp(w\cdot x)}
+\]</span></p>
+<h3 id="对模型的理解">对模型的理解</h3>
+<h4 id="几率odd">几率(odd)</h4>
+<p>记事件发生的概率为 <span class="math inline">\(p\)</span> ，那么事件发生的几率为 <span class="math inline">\(\frac{p}{1-p}\)</span></p>
+<p>对数几率(log odd / logit 函数) <span class="math display">\[
+logit(p)=log\frac{p}{1-p}
+\]</span> 对于Logistic回归来说 <span class="math display">\[
+log\frac{P(Y=1|x)}{1-P(Y=1|x)}=w\cdot x
+\]</span> 可以看出，这是在用线性模型来拟合logit函数，故称为“回归模型”</p>
+<h4 id="logistic函数">Logistic函数</h4>
+<p>另一个角度看，Logistic函数将原本取值在实数集上的变量投影到了<span class="math inline">\((0,1)\)</span> ，也就是一个概率所属的范围。</p>
+<h3 id="模型的求解">模型的求解</h3>
+<p>极大似然估计，采用数值分析的方法(梯度下降法，拟牛顿法等)求解参数向量 <span class="math inline">\(w\)</span></p>
+<h3 id="多分类的logistic回归模型">多分类的Logistic回归模型</h3>
+<p><span class="math inline">\(Y\)</span> 的取值范围是{1, 2, 3, ... , K} <span class="math display">\[
+P(Y=k|x)=\frac{exp(w_k \cdot x)}{1+\sum_{k=1}^{K-1}exp(w_k\cdot x)},\quad k=1,2,\dots, K-1 
+\]</span> <span class="math display">\[
+P(Y=K|x)=\frac{1}{1+\sum_{k=1}^{K-1}exp(w_k\cdot x)}
+\]</span></p>
+<h1 id="最大熵模型">最大熵模型</h1>
+<p>简介：最大熵模型是根据最大熵原理得到的，简单说，在所有可能的概率模型中，熵最大的模型是最好的，因为它保留了最大的不确定性，所有不确定的部分都是接近"等可能的"，减小了对不确定因素的偏见。</p>
+<h2 id="模型的定义">模型的定义</h2>
+<p>利用最大熵原理，获得一个简单的分类模型。这里所求的模型是条件概率模型。根据给定的训练集，可以获得联合分布<span class="math inline">\(P(X,Y)\)</span>的经验分布，以及边缘分布<span class="math inline">\(P(X)\)</span>的经验分布，分别记为<span class="math inline">\(\tilde{P}(X,Y)\)</span> 和 <span class="math inline">\(\tilde{P}(X)\)</span> 。</p>
+<h3 id="约束">约束</h3>
+<p>约束就是分类问题中确定的条件，也就是输入与输出之间一些已知的事实。</p>
+<p>约束用特征函数表示。 <span class="math display">\[
+f(x,y)=\left\{\begin{matrix}
+1 ,&amp; x和y满足某一事实\\ 
+0 ,&amp; 否则
+\end{matrix}\right.
+\]</span> 如果模型能够学习到数据中的信息，那么就可以<strong>假设</strong>特征函数关于经验分布和模型分布的期望是相等的。</p>
+<p>关于经验分布的期望 <span class="math display">\[
+E_{\tilde{P}}(f)=\sum_{x,y}\tilde{P}(x,y)f(x,y)
+\]</span> 关于模型的条件分布的期望 <span class="math display">\[
+E_P(f)=\sum_{x,y}\tilde{P}(x)P(y|x)f(x,y)
+\]</span> 两者应当相等 ，即 <span class="math display">\[
+E_{\tilde{P}}(f)=E_P(f)
+\]</span></p>
+<p>另外，特征函数也可不只一个。</p>
+<h3 id="熵">熵</h3>
+<p>条件熵 <span class="math display">\[
+H(P)=-\sum_{x,y}\tilde{P}(x)P(y\,|\,x)\,logP(y\,|\,x)
+\]</span></p>
+<h3 id="模型学习">模型学习</h3>
+<p>约束最优化问题 <span class="math display">\[
+\max_{P}\quad H(P)=-\sum_{x,y}\tilde{P}(x)P(y\,|\,x)\,logP(y\,|\,x)
+\]</span></p>
+<p><span class="math display">\[
+s.t.\quad E_{\tilde{P}}(f_i)=E_P(f_i),\ i=1,2,...,n
+\]</span></p>
+<p><span class="math display">\[
+\sum_yP(y\,|\,x)=1
+\]</span></p>
+<p>根据拉格朗日乘子法， <span class="math display">\[
+L(P,w)=-H(P)+w_0\left ( 1-\sum_yP(y\,|\,x)\right)+\sum_{i=1}^{n}w_i(E_{\tilde{P}}(f_i)-E_P(f_i))
+\]</span> 问题转化为 <span class="math display">\[
+\min_{P}\max_{w}L(P,w)
+\]</span> 对偶问题 <span class="math display">\[
+\max_{w}\min_{P}L(P,w)
+\]</span> 因为<span class="math inline">\(L(P,w)\)</span> 是 P 的凸函数，故原始问题和对偶问题是等价的。(但其实两者等价的条件我还没学。。。我不懂，我不会)</p>
+<p>通过对偶问题里面的极小化，可以获得一个含参的分布 <span class="math display">\[
+P_w(y\,|\,x)=\frac{1}{Z_w(x)}exp\left ( \sum_{i=1}^{n}w_if_i(x,y) \right )
+\]</span></p>
+<p><span class="math display">\[
+Z_w(x)=\sum_yexp\left ( \sum_{i=1}^{n}w_if_i(x,y) \right )
+\]</span></p>
+<p>其中<span class="math inline">\(Z_w(x)\)</span> 是正规化因子，<span class="math inline">\(w_i\)</span>是参数、权值。</p>
+<p>下面在进一步去求外面的极大化就可以把参数求出来。</p>
+<p>PS：最后一步的极大化其实等价于直接利用得到的含参的分布去做极大似然估计。</p>
+<h3 id="模型求解">模型求解</h3>
+<ul>
+<li>有一个改进的迭代尺度法，计算每次参数 <span class="math inline">\(w\)</span> 的增量 <span class="math inline">\(\delta\)</span> , 关注<span class="math inline">\(L(w+\delta)-L(w)\)</span> , 经过放缩确定下界， 为了得到更大的该变量。放缩是因为，原式太复杂。</li>
+<li>拟牛顿法</li>
+</ul>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2021-11-14</p></div> 
+    <div class="post-entry__tags"><a href="/tags/Basic/" class="post-tags__link button"># Basic</a><a href="/tags/Study/" class="post-tags__link button"># Study</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2021/03/04/VHDL%E8%AF%AD%E8%A8%80%E5%85%A5%E9%97%A8%E7%AC%94%E8%AE%B0/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            VHDL语言入门笔记
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2021/01/27/%E5%87%B8%E5%87%BD%E6%95%B0/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            凸函数
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+    <div class="post__comments content-card" id="comment">
+        
+    <h4>Comments</h4>
+    
+    <div id="disqus_thread"></div>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+    </div>
+
+
+
+</main>
+
+            <footer class="footer">
+     
+    <a href="#" class="button" id="b2t" aria-label="Back to Top" title="Back to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="32" height="32">
+            <path d="M233.376 722.752L278.624 768 512 534.624 745.376 768l45.248-45.248L512 444.128zM192 352h640V288H192z" fill="currentColor"></path>
+        </svg>
+    </a>
+
+    
+
+
+    
+    
+    
+        <span id="busuanzi_container_site_uv" hidden>
+            <span></span>
+            <span id="busuanzi_value_site_uv"></span>
+            <span>Viewers</span>
+            
+                <span>|</span>
+            
+        </span>
+    
+    
+        <span id="busuanzi_container_site_pv" hidden>
+            <span></span>
+            <span id="busuanzi_value_site_pv"></span>
+            <span>Views</span>
+            
+        </span>
+    
+ 
+ 
+
+ 
+    
+        
+                <p class="footer-copyright">
+                    Copyright ©
+                    2021
+                        <a target="_blank" rel="noopener" href="https://github.com/Furyton">
+                            Furyton
+                        </a>
+                </p>
+                
+                    
+</footer>
+        </div>
+        
+    <script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+    <script>
+        window.lazyLoadOptions = {
+            elements_selector: ".lazy",
+            threshold: 0
+        };
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement('script');
+            hm.src = 'https://hm.baidu.com/hm.js?00b1c580974b8695725e0ac0c3bc5826';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+ 
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('true'),
+            auto_fancybox = Boolean('false')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+
+    <script>
+        if (typeof MathJax === 'undefined') {
+            window.MathJax = {
+                loader: {
+                    source: {
+                        '[tex]/amsCd': '[tex]/amscd',
+                        '[tex]/AMScd': '[tex]/amscd'
+                    }
+                },
+                tex: {
+                    inlineMath: {'[+]': [['$', '$']]},
+                    tags: 'ams'
+                },
+                options: {
+                    renderActions: {
+                        findScript: [10, doc => {
+                            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                                const display = !!node.type.match(/; *mode=display/);
+                                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                                const text = document.createTextNode('');
+                                node.parentNode.replaceChild(text, node);
+                                math.start = {node: text, delim: '', n: 0};
+                                math.end = {node: text, delim: '', n: 0};
+                                doc.math.push(math);
+                            });
+                        }, '', false],
+                        insertedScript: [200, () => {
+                            document.querySelectorAll('mjx-container').forEach(node => {
+                                let target = node.parentNode;
+                                if (target.nodeName.toLowerCase() === 'li') {
+                                    target.parentNode.classList.add('has-jax');
+                                }
+                            });
+                        }, '', false]
+                    }
+                }
+            };
+            (function () {
+                var script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+                script.defer = true;
+                document.head.appendChild(script);
+            })();
+        } else {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+    
+    <script type="text/javascript">
+
+        function loadComment() {
+            let utterances, i;
+            (utterances = document.createElement("script")).src = 'https://utteranc.es/client.js';
+            document.getElementById('disqus_thread').appendChild(utterances);
+            utterances.async = true;
+            utterances.setAttribute('issue-term','title')
+            utterances.setAttribute('theme','github-light')
+            utterances.setAttribute('repo','Furyton/Furyton.github.io')
+            utterances.setAttribute('label','Comment')
+            utterances.crossorigin = 'anonymous';
+        }
+        
+        var runningOnBrowser = typeof window !== "undefined";
+        var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
+        var supportsIntersectionObserver = runningOnBrowser && "IntersectionObserver" in window;
+
+        setTimeout(function() {
+            if (!isBot && supportsIntersectionObserver) {
+                var comment_observer = new IntersectionObserver(function(entries) {
+                    if (entries[0].isIntersecting) {
+                        loadComment();
+                        comment_observer.disconnect();
+                    }
+                }, {
+                    threshold: [0]
+                });
+                comment_observer.observe(document.getElementById('comment'));
+            } else {
+                loadComment();
+            }
+        }, 1);
+    </script>
+
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+
+
+
+    </body>
+</html>
