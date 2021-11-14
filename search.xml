@@ -128,7 +128,7 @@
       <link href="/2021/06/18/BasicTopology(I)-Intuition/"/>
       <url>/2021/06/18/BasicTopology(I)-Intuition/</url>
       
-        <content type="html"><![CDATA[<h2 id="build-a-basic-intuition-on-some-classic-topology-spaces">build a basic intuition on some classic topology spaces</h2><h3 id="eulers-theorem">Euler's theorem</h3><p>for a polyhedron P ,we have v - e + f = 2</p><p>two conditions on P need to be satisfied:</p><ul><li>any two vertices can be connected by edges on P</li><li>any loop made up of straight lines divides P into two pieces</li></ul><p>对此有两个非常有启发性的证明</p>]]></content>
+        <content type="html"><![CDATA[<h2 id="build-a-basic-intuition-on-some-classic-topology-spaces">build a basic intuition on some classic topology spaces</h2><h3 id="eulers-theorem">Euler's theorem</h3><p>for a polyhedron P ,we have v - e + f = 2</p><p>two conditions on P need to be satisfied:</p><ul><li>any two vertices can be connected by edges on P</li><li>any loop made up of straight lines divides P into two pieces</li></ul><p>对此有两个非常有启发性的证明.</p>]]></content>
       
       
       <categories>
